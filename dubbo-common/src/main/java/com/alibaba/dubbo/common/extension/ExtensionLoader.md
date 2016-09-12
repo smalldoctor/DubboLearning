@@ -2,7 +2,7 @@
     - 设置新的ExtensionLoader对应的Extension的类型（接口Class）
     - 判断Extension的类型（type）是否是ExtensionFactory，如果是则objFactory为null，否则需要为其获取一个ExtensionFactory
     - 每个ExtensionLoader对应一个
-    <font color=magenta>ExtensionFactory类型的objFactory，</font><font color=blue>而ExtensionFactory也是Extension</font>
+    `ExtensionFactory类型的objFactory`，**而ExtensionFactory也是Extension**
 - getExtensionLoader
     - 从<font color=magenta>ConcurrentMap类型的ExtensionLoader</font>中获取缓存的ExtensionLoader，如果没有获取到则会new一个ExtensionLoader实例
 - getAdaptiveExtension
