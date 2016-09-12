@@ -4,29 +4,29 @@
     - 每个ExtensionLoader对应一个
     `ExtensionFactory类型的objFactory`，**而ExtensionFactory也是Extension**
 - getExtensionLoader
-    - 从<font color=magenta>ConcurrentMap类型的ExtensionLoader</font>中获取缓存的ExtensionLoader，如果没有获取到则会new一个ExtensionLoader实例
+    - 从`ConcurrentMap类型的ExtensionLoader`中获取缓存的ExtensionLoader，如果没有获取到则会new一个ExtensionLoader实例
 - getAdaptiveExtension
-    - 通过缓存的<font color=magenta>cachedAdaptiveInstance</font>(Holder类型)获取AdaptiveExtension
-    - 通过<font color=magenta>createAdaptiveInstanceError</font>缓存构建Adaptive实例时的异常
+    - 通过缓存的`cachedAdaptiveInstance`(Holder类型)获取AdaptiveExtension
+    - 通过`createAdaptiveInstanceError`缓存构建Adaptive实例时的异常
     - 如果不存在则通过synchronized同步方式构建Adaptive实例
 - createAdaptiveExtension
-    - 调用getAdaptiveExtensionClass获取AdaptiveClass,并且设置至<font color=magenta>cachedAdaptiveClass</font>
+    - 调用getAdaptiveExtensionClass获取AdaptiveClass,并且设置至`cachedAdaptiveClass`
 - getAdaptiveExtensionClass
     - 通过调用getExtensionClasses获取Extension的Class
 - getExtensionClasses
-    - 通过synchronize同步构建<font color=magenta>cachedClasses</font>
-    - 调用loadExtensionClasses构建<font color=magenta>cachedClasses</font>
+    - 通过synchronize同步构建`cachedClasses`
+    - 调用loadExtensionClasses构建`cachedClasses`
 - loadExtensionClasses
-    - 获取Extension的默认实现，即注解SPI的默认值；设置至<font color=magenta>cachedDefaultName</font>
-    - 默认搜寻classpath中<font color=blue> META-INF/dubbo/internal/，META-INF/dubbo/，META-INF/services/目录下的以接口全限定名作为名字的文件（UTF-8编码，流是按照UTF-8解码），配置格式：key＝value或者class#name
+    - 获取Extension的默认实现，即注解SPI的默认值；设置至`cachedDefaultName`
+    - 默认搜寻classpath中**META-INF/dubbo/internal/，META-INF/dubbo/，META-INF/services/目录下的以接口全限定名作为名字的文件（UTF-8编码，流是按照UTF-8解码），配置格式：key＝value或者class#name**
     - 调用loadFile读取Extension
 - loadFile
     - 通过类加载器读取配置文件
     - 循环遍历符合要求的配置文件
         - 按行解析配置文件
         - 判断配置的ExtensionProvider是否实现了Extension接口
-        - 判断ExtensionProvider是否有Adaptive注解，如果有Adaptive注解则设置<font color=magenta>cachedAdaptiveClass</font>。如果使用注解的方式设置Adaptive，则只能有一个ExtensionProvider使用此注解，如果多个会抛出异常。<font color=blue>也就是说一个Extension只有有一个AdaptiveClass。</font>
+        - 判断ExtensionProvider是否有Adaptive注解，如果有Adaptive注解则设置`cachedAdaptiveClass`。如果使用注解的方式设置Adaptive，则只能有一个ExtensionProvider使用此注解，如果多个会抛出异常。**也就是说一个Extension只有有一个AdaptiveClass**。
         - 如果没有Adaptive注解
-            - 获取ExtensionProvider有且只有Extension类型作为参数的构造器（Wrapper的识别规则是ExtensionProvider存在有且只有Extension类型作为参数的构造器）。**如果获取不到抛出NoSuchMethodException，因此根据此异常判断不是Wrapper。**
+            - 获取ExtensionProvider有且只有Extension类型作为参数的构造器（Wrapper的识别规则是ExtensionProvider存在有且只有Extension类型作为参数的构造器）。**如果获取不到抛出NoSuchMethodException，因此根据此异常判断不是Wrapper**。
 - findClassLoader
     - 获取ExtensionLoader的ClassLoarder类加载器
