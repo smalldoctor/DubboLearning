@@ -27,6 +27,6 @@
         - 判断配置的ExtensionProvider是否实现了Extension接口
         - 判断ExtensionProvider是否有Adaptive注解，如果有Adaptive注解则设置<font color=magenta>cachedAdaptiveClass</font>。如果使用注解的方式设置Adaptive，则只能有一个ExtensionProvider使用此注解，如果多个会抛出异常。<font color=blue>也就是说一个Extension只有有一个AdaptiveClass。</font>
         - 如果没有Adaptive注解
-            - 获取ExtensionProvider有且只有Extension类型作为参数的构造器<font color=blue>（Wrapper的识别规则是ExtensionProvider存在有且只有Extension类型作为参数的构造器）</font>。** 如果获取不到抛出NoSuchMethodException，因此根据此异常判断不是Wrapper。 **
+            - 获取ExtensionProvider有且只有Extension类型作为参数的构造器（Wrapper的识别规则是ExtensionProvider存在有且只有Extension类型作为参数的构造器）。** 如果获取不到抛出NoSuchMethodException，因此根据此异常判断不是Wrapper。 **
 - findClassLoader
     - 获取ExtensionLoader的ClassLoarder类加载器
