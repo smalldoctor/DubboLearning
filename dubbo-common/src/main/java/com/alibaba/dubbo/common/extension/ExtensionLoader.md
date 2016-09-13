@@ -9,12 +9,13 @@
     - 通过缓存的`cachedAdaptiveInstance`(Holder类型)获取AdaptiveExtension
     - 通过`createAdaptiveInstanceError`缓存构建Adaptive实例时的异常
     - 如果不存在则通过synchronized同步方式构建Adaptive实例
+    - 缓存至`cachedAdaptiveInstance`
 - createAdaptiveExtension
     - 调用getAdaptiveExtensionClass获取AdaptiveClass,并且设置至`cachedAdaptiveClass`
 - getAdaptiveExtensionClass
     - 通过调用getExtensionClasses获取Extension的Class
 - getExtensionClasses
-    - 通过synchronize同步构建`cachedClasses`
+    - 通过synchronize同步构建`cachedClasses`（**Holder封装的Map缓存**）
     - 调用loadExtensionClasses构建`cachedClasses`
 - loadExtensionClasses
     - 获取Extension的默认实现，即注解SPI的默认值；设置至`cachedDefaultName`
@@ -28,5 +29,27 @@
         - 判断ExtensionProvider是否有Adaptive注解，如果有Adaptive注解则设置`cachedAdaptiveClass`。如果使用注解的方式设置Adaptive，则只能有一个ExtensionProvider使用此注解，如果多个会抛出异常。**也就是说一个Extension只有有一个AdaptiveClass**。
         - 如果没有Adaptive注解
             - 获取ExtensionProvider有且只有Extension类型作为参数的构造器（Wrapper的识别规则是ExtensionProvider存在有且只有Extension类型作为参数的构造器）。**如果获取不到抛出NoSuchMethodException，因此根据此异常判断不是Wrapper**。
+              - 如果ExtensionProvider是Wrapper，则会将其缓存到`cachedWrapperClasses`,**`cachedWrapperClasses`是ConcurrentHashSet类型**
+            - 如果ExtensionProvider不是Wrapper，则会获取ExtensionProvider的无参构造器（**普通ExtensionProvider则必须存在无参构造器**）
+              - 如果ExtensionProvider存在Activate注解，则将其缓存至**ConcurrentMap**类型的`cachedActivates`中，key是ExtensionProvider的name，value是ExtensionProvider的Activate注解
+              - 将ExtensionProvider的name缓存至*ConcurrentMap*类型的`cachedNames`中，key是ExtensionProvider的Class，value是ExtensionProvider的name
+              - 将name作为key，ExtensionProvider的Class作为value放进临时变量Map中，最后设置到`cachedClasses`
+- getExtension
+  - 如果传入的name等于‘true’获取默认的ExtensionProvider，name即为cachedDefaultName
+  - 从ExtensionProvider的缓存**ConcurrentMap类型**`cachedInstances`(**key是ExtensionProvider的name，value是Holder封装的ExtensionProvider的实例**)
+- createExtension
+  - 从ExtensionProvider的实例缓存**ConcurrentMap类型**的`EXTENSION_INSTANCES`中获取
+  - 调用injectExtension注入当前Extension所需要的其他Extension，根据标准的setXXXX方法识别是否需要注入
+  - 如果当前的Extension存在Wrapper，会进行逐层Wrapper。如ExtensionProviderA,WrapperB,WrapperC，最后返回的是WrapperC包装的WrapperB，而WrapperB又包装了ExtensionProviderA
+- injectExtension
+  - 根据标准的setXXXX方法识别是否需要注入识别所需要的Extension
+  - 使用ExtensionLoader的objFactory的getExtension方法获取Extension并注入到当前的Extension所需要的中去
+- createAdaptiveExtensionClass
+  - 如果没有配置Adaptive即没有自己实现Adaptive，则系统会自动创建Adaptive。
+  - 通过createAdaptiveExtensionClassCode构建自动的Adaptive的java code。
+  - 对于系统自动创建Adaptive，框架将创建的Compile也作为一个SPI，支持不同的ExtensionProvider，如javassist，jdk等
+- createAdaptiveExtensionClassCode
+  - 首先判断是否存在含有Adaptive注解的方法，如果没有则抛出异常，不需要构建Adaptive的异常
+  - **需要构建Adaptive的方法，其参数包含URL的类型的参数或者参数的成员方法中存在返回URL类型对象的方法**
 - findClassLoader
     - 获取ExtensionLoader的ClassLoarder类加载器
